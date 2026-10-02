@@ -108,5 +108,25 @@
     "pattern": "^([0-9]+)mo$",
     "replacement": "$1 个月",
     "flags": "i"
+  },
+  {
+    "pattern": "^Resets in\\s+([0-9]+)d\\s*([0-9]+)h$",
+    "replacement": "将在 $1天 $2小时 后重置",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Resets in\\s+([0-9]+)h\\s*([0-9]+)m$",
+    "replacement": "将在 $1小时 $2分钟 后重置",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Resets in\\s+([0-9]+)m\\s*([0-9]+)s$",
+    "replacement": "将在 $1分钟 $2秒 后重置",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Resets in\\s+(.+)$",
+    "replacement": "将在 $1 后重置",
+    "flags": "i"
   }
 ]
