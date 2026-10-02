@@ -62,8 +62,8 @@ npx antigravity-chinese restore
 
 ```bash
 # 1. 克隆本仓库
-git clone https://github.com/google-antigravity-community/antigravity-chinese.git
-cd antigravity-chinese
+git clone https://github.com/paopao-amns/antigravity-cn.git
+cd antigravity-cn
 
 # 2. 安装必要依赖
 npm install
@@ -148,7 +148,7 @@ flowchart TD
 
 1. **补充未翻译词条**：按下 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>L</kbd> 开启词条检查器，点击复制文本后提 PR 补充到 [`locales/zh-CN.json`](./locales/zh-CN.json)；
 2. **改进润色翻译**：如果发现任何不符合中国开发者习惯的生硬翻译，随时提交修改建议；
-3. **提交 Issue**：遇到任何兼容性或安装报错，欢迎提交 [Bug Report](https://github.com/google-antigravity-community/antigravity-chinese/issues)。
+3. **提交 Issue**：遇到任何兼容性或安装报错，欢迎提交 [Bug Report](https://github.com/paopao-amns/antigravity-cn/issues)。
 
 详情请参阅我们的 [贡献指南 (CONTRIBUTING.md)](./CONTRIBUTING.md)。
 

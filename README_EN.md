@@ -40,8 +40,8 @@ npx antigravity-chinese restore
 
 ### Manual Installation
 ```bash
-git clone https://github.com/google-antigravity-community/antigravity-chinese.git
-cd antigravity-chinese
+git clone https://github.com/paopao-amns/antigravity-cn.git
+cd antigravity-cn
 npm install
 npm run install-patch
 ```

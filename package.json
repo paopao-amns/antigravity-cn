@@ -30,7 +30,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/google-antigravity-community/antigravity-chinese.git"
+    "url": "https://github.com/paopao-amns/antigravity-cn.git"
   },
   "engines": {
     "node": ">=18.0.0"
