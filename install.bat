@@ -1,31 +1,21 @@
 @echo off
-chcp 65001 >nul
-title Antigravity-CN 一键汉化安装工具
+setlocal
+cd /d "%~dp0"
 
-echo ========================================================
-echo        Antigravity-CN 官方级全界面汉化一键安装程序
-echo ========================================================
-echo.
+title Antigravity-CN Installer
 
-node -v >nul 2>&1
+where node >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [错误] 未检测到 Node.js 环境，请先安装 Node.js (https://nodejs.org/)
+    echo [ERROR] Node.js is not installed or not in PATH.
+    echo Please install Node.js from https://nodejs.org/ and run this script again.
     pause
     exit /b 1
 )
 
-echo [1/3] 正在检查依赖环境...
 if not exist "%~dp0node_modules\@electron\asar" (
-    echo [提示] 正在安装必要解包工具，请稍候...
+    echo [INFO] Installing required dependencies...
     call npm install --no-audit --no-fund
 )
 
-echo.
-echo [2/3] 正在执行汉化补丁安装...
-node "%~dp0bin\cli.js" install
-
-echo.
-echo ========================================================
-echo 操作完成。如果安装成功，请启动 Antigravity 查看效果！
-echo ========================================================
+node "%~dp0bin\cli.js" install %*
 pause

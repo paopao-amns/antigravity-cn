@@ -5,7 +5,7 @@
  * Command line utility to install, check, and restore Chinese localization for Antigravity.
  */
 
-const { getStatus, installPatch, restoreOriginal } = require('../src/patcher/patcher');
+const { getStatus, installPatch, restoreOriginal, killAntigravity } = require('../src/patcher/patcher');
 const path = require('path');
 
 const args = process.argv.slice(2);
@@ -15,6 +15,7 @@ function parseFlags() {
   const flags = {
     customPath: null,
     force: false,
+    kill: false,
   };
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--path' && args[i + 1]) {
@@ -22,6 +23,8 @@ function parseFlags() {
       i++;
     } else if (args[i] === '--force' || args[i] === '-f') {
       flags.force = true;
+    } else if (args[i] === '--kill' || args[i] === '-k') {
+      flags.kill = true;
     }
   }
   return flags;
@@ -52,11 +55,18 @@ async function main() {
         }
 
         console.log(`✓ 找到安装目录: ${status.installDir}`);
-        if (status.isRunning && !flags.force) {
-          console.warn(`\n⚠️ 警告: 检测到 Antigravity 正在运行！`);
-          console.warn(`为了防止文件被系统锁定导致安装失败，请先彻底关闭 Antigravity 窗口与托盘程序。`);
-          console.warn(`如果确认已关闭，请重新运行或添加 --force 参数强制执行。\n`);
-          process.exit(1);
+        if (status.isRunning) {
+          if (flags.kill) {
+            console.log('\n[提示] 正在自动关闭运行中的 Antigravity 进程...');
+            killAntigravity();
+            await new Promise((r) => setTimeout(r, 1500));
+          } else if (!flags.force) {
+            console.warn(`\n⚠️ 警告: 检测到 Antigravity 正在运行！`);
+            console.warn(`为了防止文件被系统锁定导致安装失败，请先彻底关闭 Antigravity 窗口与托盘程序。`);
+            console.warn(`提示：您也可以添加 --kill 参数自动关闭并安装:`);
+            console.warn(`  npx antigravity-chinese install --kill\n`);
+            process.exit(1);
+          }
         }
 
         console.log('\n[2/3] 正在应用汉化补丁...');
@@ -123,10 +133,12 @@ async function main() {
 
 选项参数 (Options):
   --path <dir>     手动指定 Antigravity 的安装目录或 resources 目录
+  --kill, -k       自动关闭正在运行的 Antigravity 进程并继续安装
   --force, -f      忽略进程运行检测，强制执行操作
 
 示例 (Examples):
   npx antigravity-chinese install
+  npx antigravity-chinese install --kill
   npx antigravity-chinese restore
   npx antigravity-chinese install --path "D:\\Software\\antigravity"
       `);

@@ -33,6 +33,20 @@ function isAntigravityRunning() {
   } catch (e) {
     return false;
   }
+}/**
+ * Kills running Antigravity processes
+ */
+function killAntigravity() {
+  try {
+    if (process.platform === 'win32') {
+      execSync('taskkill /F /IM Antigravity.exe /T', { stdio: 'ignore' });
+    } else {
+      execSync('pkill -f -i antigravity', { stdio: 'ignore' });
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
@@ -221,6 +235,7 @@ function escapeRegExp(string) {
 
 module.exports = {
   isAntigravityRunning,
+  killAntigravity,
   getStatus,
   installPatch,
   restoreOriginal,
