@@ -1,0 +1,41 @@
+{
+  "name": "antigravity-chinese",
+  "version": "1.0.0",
+  "description": "Google Antigravity 官方级全界面深度汉化补丁与中文增强套件 (Community Chinese Localization for Google Antigravity)",
+  "main": "src/patcher/patcher.js",
+  "bin": {
+    "antigravity-chinese": "./bin/cli.js",
+    "antigravity-cn": "./bin/cli.js"
+  },
+  "scripts": {
+    "install-patch": "node ./bin/cli.js install",
+    "restore": "node ./bin/cli.js restore",
+    "status": "node ./bin/cli.js status",
+    "update-dict": "node ./bin/cli.js update",
+    "validate": "node ./scripts/validate-dictionary.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "antigravity",
+    "google-antigravity",
+    "chinese",
+    "localization",
+    "i18n",
+    "l10n",
+    "zh-cn",
+    "translation",
+    "patcher"
+  ],
+  "author": "Antigravity-CN Open Source Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/google-antigravity-community/antigravity-chinese.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@electron/asar": "^3.2.14"
+  }
+}

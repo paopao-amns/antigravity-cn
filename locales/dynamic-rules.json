@@ -1,0 +1,62 @@
+[
+  {
+    "pattern": "^Thought for\\s+([0-9.]+)\\s*(?:s|seconds)$",
+    "replacement": "已思考 $1 秒",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+files?\\s+changed$",
+    "replacement": "$1 个文件已变更",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Last\\s+([0-9]+)\\s+days?$",
+    "replacement": "最近 $1 天",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+matches?$",
+    "replacement": "共找到 $1 处匹配",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+selected$",
+    "replacement": "已选择 $1 项",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+conversations?$",
+    "replacement": "$1 个会话",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+minutes?\\s+ago$",
+    "replacement": "$1 分钟前",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+hours?\\s+ago$",
+    "replacement": "$1 小时前",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+days?\\s+ago$",
+    "replacement": "$1 天前",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Just now$",
+    "replacement": "刚刚",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Connecting to\\s+(.+)$",
+    "replacement": "正在连接到 $1...",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Step\\s+([0-9]+)\\s+of\\s+([0-9]+)$",
+    "replacement": "第 $1 / $2 步",
+    "flags": "i"
+  }
+]

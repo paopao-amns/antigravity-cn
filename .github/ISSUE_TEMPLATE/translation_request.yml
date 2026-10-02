@@ -1,0 +1,31 @@
+name: 词条翻译建议或补全 (Translation Request)
+description: 提交未翻译的英文词条或对现有中文翻译提出改进建议
+title: "[词条建议]: "
+labels: ["translation", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您为 Antigravity-CN 贡献力量！请填写以下信息，帮助我们完善中文化词典。
+  - type: input
+    id: original_text
+    attributes:
+      label: 原始英文词条 (Original English Text)
+      description: 界面中显示的英文原文，可使用 Ctrl+Shift+L 检查模式一键复制
+      placeholder: "e.g. Reject Step"
+    validations:
+      required: true
+  - type: input
+    id: suggested_translation
+    attributes:
+      label: 建议的中文翻译 (Suggested Chinese Translation)
+      description: 您认为最合适、最符合开发者习惯的中文表述
+      placeholder: "e.g. 拒绝步骤"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 出现位置或界面上下文 (Context / Location)
+      description: 该词条出现在哪个位置（如：侧边栏、设置面板、终端提示等）
+      placeholder: "出现在对话底部的操作按钮区域..."
