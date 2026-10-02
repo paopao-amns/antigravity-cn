@@ -123,25 +123,25 @@ async function installPatch(options = {}) {
       throw new Error(`dist/preload.js not found in ${tempExtractDir}`);
     }
 
-    // 2. Prepare i18n directory inside extracted asar
-    const targetI18nDir = path.join(tempExtractDir, 'dist', 'i18n');
-    fs.mkdirSync(targetI18nDir, { recursive: true });
-
-    // Copy runtime files
+    // 2. Build standalone inlined bundle with zero require dependencies
     const projectRoot = path.resolve(__dirname, '../../');
-    const preloadHookSrc = path.join(projectRoot, 'src', 'loader', 'preload-hook.js');
-    const engineSrc = path.join(projectRoot, 'src', 'engine', 'translator.js');
-    const dictSrc = path.join(projectRoot, 'locales', 'zh-CN.json');
-    const rulesSrc = path.join(projectRoot, 'locales', 'dynamic-rules.json');
+    const dict = JSON.parse(fs.readFileSync(path.join(projectRoot, 'locales', 'zh-CN.json'), 'utf8'));
+    const rules = JSON.parse(fs.readFileSync(path.join(projectRoot, 'locales', 'dynamic-rules.json'), 'utf8'));
+    const engine = fs.readFileSync(path.join(projectRoot, 'src', 'engine', 'translator.js'), 'utf8');
 
-    fs.copyFileSync(preloadHookSrc, path.join(targetI18nDir, 'preload-hook.js'));
-    fs.copyFileSync(engineSrc, path.join(targetI18nDir, 'translator.js'));
-    fs.copyFileSync(dictSrc, path.join(targetI18nDir, 'zh-CN.json'));
-    if (fs.existsSync(rulesSrc)) {
-      fs.copyFileSync(rulesSrc, path.join(targetI18nDir, 'dynamic-rules.json'));
-    }
+    const inlinedBundle = `\n${PATCH_TAG_START}
+try {
+  window.__AGY_LOCALE_DATA__ = {
+    dict: ${JSON.stringify(dict)},
+    rules: ${JSON.stringify(rules)}
+  };
+  ${engine}
+} catch (err) {
+  console.error('[Antigravity-CN] Translator error:', err);
+}
+${PATCH_TAG_END}\n`;
 
-    // 3. Inject hook into dist/preload.js
+    // 3. Inject standalone bundle directly into dist/preload.js
     let preloadContent = fs.readFileSync(preloadPath, 'utf8');
 
     // Remove existing patch if present to allow re-patching cleanly
@@ -153,15 +153,7 @@ async function installPatch(options = {}) {
       preloadContent = preloadContent.replace(regex, '');
     }
 
-    const hookInjection = `\n${PATCH_TAG_START}
-try {
-  require('./i18n/preload-hook');
-} catch (e) {
-  console.error('[Antigravity-CN] Hook load failed:', e);
-}
-${PATCH_TAG_END}\n`;
-
-    preloadContent += hookInjection;
+    preloadContent += inlinedBundle;
     fs.writeFileSync(preloadPath, preloadContent, 'utf8');
 
     // 4. Also optionally patch native menus in dist/menu.js

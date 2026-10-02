@@ -223,23 +223,43 @@
   });
 
   function startObserver() {
-    const target = document.body || document.documentElement;
+    const target = document.documentElement;
     if (target) {
       processSubtree(target);
-      observer.observe(target, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: TRANSLATABLE_ATTRS,
-      });
+      try {
+        observer.observe(target, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+          attributes: true,
+          attributeFilter: TRANSLATABLE_ATTRS,
+        });
+      } catch (e) {
+        console.error('[Antigravity-CN] Observer attach failed:', e);
+      }
     }
   }
 
+  // Start observing immediately
+  startObserver();
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startObserver);
-  } else {
-    startObserver();
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.body) processSubtree(document.body);
+    });
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('load', () => {
+      if (document.body) processSubtree(document.body);
+    });
+
+    // Sweeps to catch initial React mount/hydration
+    [300, 800, 1500, 3000].forEach((delay) => {
+      setTimeout(() => {
+        if (document.body) processSubtree(document.body);
+      }, delay);
+    });
   }
 
   // ==========================================
