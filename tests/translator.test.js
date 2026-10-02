@@ -60,3 +60,34 @@ test('Do not alter unknown strings or single characters', () => {
   assert.strictEqual(mockTranslateString('x'), null);
   assert.strictEqual(mockTranslateString('SomeCustomCodeIdentifier_123'), null);
 });
+
+test('Translate slash commands correctly', () => {
+  assert.strictEqual(
+    mockTranslateString('Run until the specified goal is completely finished.'),
+    '全力运行直至指定的任务目标彻底完成（长任务深度执行）'
+  );
+  assert.strictEqual(
+    mockTranslateString('Run an instruction on a recurring schedule or as a one-time timer.'),
+    '按周期性计划执行指令，或设定单次定时提醒'
+  );
+  assert.strictEqual(
+    mockTranslateString('Invoke a browser agent for web tasks.'),
+    '唤起浏览器智能体执行网页自动化交互任务'
+  );
+});
+
+test('Protected model speed and thinking intensity tiers must NEVER be translated', () => {
+  const protectedWords = ['Fast', 'High', 'Medium', 'Low', 'Thinking', 'Flash', 'Pro', 'Ultra'];
+  const PROTECTED_SET = new Set(protectedWords);
+  for (const word of protectedWords) {
+    assert.strictEqual(PROTECTED_SET.has(word), true);
+    assert.strictEqual(DICT[word], undefined, `Expected "${word}" NOT to be in dictionary`);
+  }
+});
+
+test('Translate new dynamic regex rules', () => {
+  assert.strictEqual(mockTranslateString('30 tools enabled'), '30 项工具已启用');
+  assert.strictEqual(mockTranslateString('2 items'), '2 个项目');
+  assert.strictEqual(mockTranslateString('1.5k Tokens (MCP)'), '1.5k Token (MCP)');
+});
+

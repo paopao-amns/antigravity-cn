@@ -14,19 +14,35 @@
 (function () {
   'use strict';
 
-  // Prevent double-initialization
-  if (window.__AGY_TRANSLATOR_INITIALIZED__) {
-    return;
+  // Disconnect existing observer if reloading
+  if (window.__AGY_TRANSLATOR_OBSERVER__) {
+    try {
+      window.__AGY_TRANSLATOR_OBSERVER__.disconnect();
+    } catch (e) {}
   }
   window.__AGY_TRANSLATOR_INITIALIZED__ = true;
 
   // Retrieve dictionary & dynamic rules from global or fallback
-  const localeData = window.__AGY_LOCALE_DATA__ || { dict: {}, rules: [] };
-  const DICT = localeData.dict || {};
-  const DYNAMIC_RULES = (localeData.rules || []).map((r) => ({
+  const initialLocaleData = window.__AGY_LOCALE_DATA__ || { dict: {}, rules: [] };
+  const fallbackDict = initialLocaleData.dict || {};
+  const fallbackRules = (initialLocaleData.rules || []).map((r) => ({
     regex: new RegExp(r.pattern, r.flags || 'i'),
     replacement: r.replacement,
   }));
+
+  function getDict() {
+    return (window.__AGY_LOCALE_DATA__ && window.__AGY_LOCALE_DATA__.dict) || fallbackDict;
+  }
+
+  function getRules() {
+    if (window.__AGY_LOCALE_DATA__ && window.__AGY_LOCALE_DATA__.rules) {
+      return window.__AGY_LOCALE_DATA__.rules.map((r) => ({
+        regex: new RegExp(r.pattern, r.flags || 'i'),
+        replacement: r.replacement,
+      }));
+    }
+    return fallbackRules;
+  }
 
   // State
   let isEnabled = true;
@@ -79,6 +95,24 @@
     return false;
   }
 
+  // Technical model terms and thinking tiers that must NEVER be translated
+  const PROTECTED_WORDS = new Set([
+    'Fast',
+    'High',
+    'Medium',
+    'Low',
+    'Thinking',
+    'Flash',
+    'Pro',
+    'Ultra',
+    'Sonnet',
+    'Opus',
+    'Haiku',
+    'Claude',
+    'Gemini',
+    'GPT'
+  ]);
+
   /**
    * Translate a single text string
    */
@@ -86,6 +120,14 @@
     if (!rawText) return null;
     const trimmed = rawText.trim();
     if (!trimmed || trimmed.length < 2) return null;
+
+    // Never translate protected technical tiers/model terms
+    if (PROTECTED_WORDS.has(trimmed)) {
+      return null;
+    }
+
+    const DICT = getDict();
+    const DYNAMIC_RULES = getRules();
 
     // 1. Direct dictionary match
     if (DICT[trimmed] && DICT[trimmed] !== trimmed) {
@@ -225,6 +267,7 @@
   function startObserver() {
     const target = document.documentElement;
     if (target) {
+      window.__AGY_TRANSLATOR_OBSERVER__ = observer;
       processSubtree(target);
       try {
         observer.observe(target, {
@@ -345,12 +388,17 @@
       }
       return isEnabled;
     },
+    reload: function () {
+      processSubtree(document.body);
+    },
     getStats: function () {
+      const d = getDict();
+      const r = getRules();
       return {
         enabled: isEnabled,
         translatedNodes: translatedNodesCount,
-        dictEntries: Object.keys(DICT).length,
-        dynamicRules: DYNAMIC_RULES.length,
+        dictEntries: Object.keys(d).length,
+        dynamicRules: r.length,
       };
     },
     inspectMode: function (active) {
@@ -359,5 +407,7 @@
     },
   };
 
-  console.log(`[Antigravity-CN] 汉化引擎已就绪 (词条数: ${Object.keys(DICT).length}, 规则数: ${DYNAMIC_RULES.length})`);
+  const d = getDict();
+  const r = getRules();
+  console.log(`[Antigravity-CN] 汉化引擎已就绪 (词条数: ${Object.keys(d).length}, 规则数: ${r.length})`);
 })();

@@ -128,5 +128,20 @@
     "pattern": "^Resets in\\s+(.+)$",
     "replacement": "将在 $1 后重置",
     "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+tools\\s+enabled$",
+    "replacement": "$1 项工具已启用",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9]+)\\s+items?$",
+    "replacement": "$1 个项目",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([0-9.]+k?)\\s+Tokens?\\s*\\((.*)\\)$",
+    "replacement": "$1 Token ($2)",
+    "flags": "i"
   }
 ]
