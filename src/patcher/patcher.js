@@ -176,7 +176,7 @@ ${PATCH_TAG_END}\n`;
 
     // 6. Replace target asar
     fs.copyFileSync(tempPackAsar, detection.asarPath);
-    console.log(`[Antigravity-CN] 汉化补丁安装成功！🎉`);
+    console.log(`[Antigravity-CN] 汉化补丁安装成功！`);
 
     return {
       success: true,
