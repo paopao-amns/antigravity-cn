@@ -143,5 +143,20 @@
     "pattern": "^([0-9.]+k?)\\s+Tokens?\\s*\\((.*)\\)$",
     "replacement": "$1 Token ($2)",
     "flags": "i"
+  },
+  {
+    "pattern": "^Running\\s+([0-9]+)\\s+commands?$",
+    "replacement": "正在执行 $1 条命令",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Restart to Update\\s*(?:->|→)$",
+    "replacement": "重启以应用更新 →",
+    "flags": "i"
+  },
+  {
+    "pattern": "^Thinking for\\s+(.+)$",
+    "replacement": "正在思考 $1",
+    "flags": "i"
   }
 ]

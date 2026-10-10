@@ -12,5 +12,5 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-node "%~dp0bin\cli.js" restore %*
+node "%~dp0bin\cli.js" restore --kill %*
 pause

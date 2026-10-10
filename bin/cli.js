@@ -90,11 +90,33 @@ async function main() {
     case 'r':
     case 'uninstall': {
       try {
-        console.log('正在还原官方原始版本...');
-        restoreOriginal({ customPath: flags.customPath, force: flags.force });
-        console.log('[+] 已成功恢复官方英文版。');
+        console.log('[1/2] 正在检测 Antigravity 安装状态...');
+        const status = getStatus(flags.customPath);
+        if (!status.installed) {
+          console.error(`[!] 未找到 Antigravity 安装路径。`);
+          process.exit(1);
+        }
+
+        if (status.isRunning) {
+          if (flags.kill) {
+            console.log('\n[提示] 正在自动关闭运行中的 Antigravity 进程...');
+            killAntigravity();
+            await new Promise((r) => setTimeout(r, 1500));
+          } else if (!flags.force) {
+            console.warn(`\n[警告] 检测到 Antigravity 正在运行！`);
+            console.warn(`请先关闭 Antigravity 应用程序，或者添加 --kill 参数自动关闭:`);
+            console.warn(`  npx antigravity-chinese restore --kill\n`);
+            process.exit(1);
+          }
+        }
+
+        console.log('\n[2/2] 正在还原官方原始版本...');
+        restoreOriginal({ customPath: flags.customPath, force: flags.force || flags.kill });
+        console.log('\n======================================================');
+        console.log('[+] 已成功恢复官方英文版！');
+        console.log('======================================================\n');
       } catch (err) {
-        console.error(`[!] 还原失败: ${err.message}`);
+        console.error(`\n[!] 还原失败: ${err.message}`);
         process.exit(1);
       }
       break;

@@ -95,6 +95,23 @@
     return false;
   }
 
+  function isExcludedAttrElement(el) {
+    if (!el) return true;
+    let curr = el;
+    while (curr && curr !== document.body && curr !== document.documentElement) {
+      if (curr.tagName === 'CODE' || curr.tagName === 'PRE' || curr.tagName === 'SCRIPT' || curr.tagName === 'STYLE') {
+        return true;
+      }
+      for (const sel of EXCLUDED_SELECTORS) {
+        if (curr.matches && curr.matches(sel)) {
+          return true;
+        }
+      }
+      curr = curr.parentElement;
+    }
+    return false;
+  }
+
   // Technical model terms and thinking tiers that must NEVER be translated
   const PROTECTED_WORDS = new Set([
     'Fast',
@@ -154,11 +171,17 @@
    * Translate a DOM Text Node
    */
   function translateTextNode(node) {
-    if (!isEnabled) return;
-    if (translatedNodes.has(node)) return;
+    if (!isEnabled || !node) return;
     if (isExcludedNode(node)) return;
 
     const originalText = node.nodeValue;
+    if (!originalText) return;
+
+    // Fast skip if node already displays our translated value
+    if (node.__agyLastTranslatedValue && originalText === node.__agyLastTranslatedValue) {
+      return;
+    }
+
     const translated = translateString(originalText);
 
     if (translated && translated !== originalText) {
@@ -166,6 +189,7 @@
       if (!node.__agyOriginalText) {
         node.__agyOriginalText = originalText;
       }
+      node.__agyLastTranslatedValue = translated;
       node.nodeValue = translated;
       translatedNodes.add(node);
       translatedNodesCount++;
@@ -178,17 +202,21 @@
   const TRANSLATABLE_ATTRS = ['placeholder', 'title', 'aria-label'];
 
   function translateAttributes(el) {
-    if (!isEnabled || !el.getAttribute) return;
-    if (isExcludedNode(el)) return;
+    if (!isEnabled || !el || !el.getAttribute) return;
+    if (isExcludedAttrElement(el)) return;
 
     for (const attr of TRANSLATABLE_ATTRS) {
       const val = el.getAttribute(attr);
       if (val) {
+        if (el[`__agyLast_${attr}`] && val === el[`__agyLast_${attr}`]) {
+          continue;
+        }
         const translated = translateString(val);
         if (translated && translated !== val) {
           if (!el[`__agyOrig_${attr}`]) {
             el[`__agyOrig_${attr}`] = val;
           }
+          el[`__agyLast_${attr}`] = translated;
           el.setAttribute(attr, translated);
         }
       }
@@ -199,7 +227,7 @@
    * Process a subtree recursively
    */
   function processSubtree(root) {
-    if (!root || isExcludedNode(root)) return;
+    if (!root) return;
 
     if (root.nodeType === Node.TEXT_NODE) {
       translateTextNode(root);
@@ -209,13 +237,15 @@
     if (root.nodeType === Node.ELEMENT_NODE) {
       translateAttributes(root);
 
+      if (isExcludedNode(root)) return;
+
       // Walk text nodes
       const walker = document.createTreeWalker(
         root,
         NodeFilter.SHOW_TEXT,
         {
           acceptNode: function (node) {
-            if (translatedNodes.has(node)) {
+            if (node.__agyLastTranslatedValue && node.nodeValue === node.__agyLastTranslatedValue) {
               return NodeFilter.FILTER_REJECT;
             }
             if (isExcludedNode(node)) {
@@ -260,15 +290,18 @@
     pendingMutations.push(...mutations);
     if (!isBatchScheduled) {
       isBatchScheduled = true;
-      requestAnimationFrame(flushBatch);
+      if (typeof queueMicrotask === 'function') {
+        queueMicrotask(flushBatch);
+      } else {
+        setTimeout(flushBatch, 0);
+      }
     }
   });
 
-  function startObserver() {
-    const target = document.documentElement;
+  function ensureObserver() {
+    if (window.__AGY_TRANSLATOR_OBSERVER__) return;
+    const target = document.documentElement || document.body || document;
     if (target) {
-      window.__AGY_TRANSLATOR_OBSERVER__ = observer;
-      processSubtree(target);
       try {
         observer.observe(target, {
           childList: true,
@@ -277,32 +310,48 @@
           attributes: true,
           attributeFilter: TRANSLATABLE_ATTRS,
         });
+        window.__AGY_TRANSLATOR_OBSERVER__ = observer;
       } catch (e) {
         console.error('[Antigravity-CN] Observer attach failed:', e);
       }
     }
   }
 
-  // Start observing immediately
-  startObserver();
+  // Start observing and initial sweep
+  ensureObserver();
+  if (typeof document !== 'undefined') {
+    if (document.documentElement) {
+      processSubtree(document.documentElement);
+    }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (document.body) processSubtree(document.body);
-    });
-  }
-
-  if (typeof window !== 'undefined') {
-    window.addEventListener('load', () => {
-      if (document.body) processSubtree(document.body);
-    });
-
-    // Sweeps to catch initial React mount/hydration
-    [300, 800, 1500, 3000].forEach((delay) => {
-      setTimeout(() => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        ensureObserver();
         if (document.body) processSubtree(document.body);
-      }, delay);
-    });
+      });
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('load', () => {
+        ensureObserver();
+        if (document.body) processSubtree(document.body);
+      });
+
+      // Rapid sweeps to catch initial React mount/hydration
+      [200, 500, 1000, 2000, 3000].forEach((delay) => {
+        setTimeout(() => {
+          ensureObserver();
+          if (document.body) processSubtree(document.body);
+        }, delay);
+      });
+
+      // Heartbeat sweep (every 1.5s) to guarantee zero untranslated dynamic cards/streams
+      setInterval(() => {
+        if (!isEnabled) return;
+        ensureObserver();
+        if (document.body) processSubtree(document.body);
+      }, 1500);
+    }
   }
 
   // ==========================================

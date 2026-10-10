@@ -89,5 +89,10 @@ test('Translate new dynamic regex rules', () => {
   assert.strictEqual(mockTranslateString('30 tools enabled'), '30 项工具已启用');
   assert.strictEqual(mockTranslateString('2 items'), '2 个项目');
   assert.strictEqual(mockTranslateString('1.5k Tokens (MCP)'), '1.5k Token (MCP)');
+  assert.strictEqual(mockTranslateString('Running 2 commands'), '正在执行 2 条命令');
+  assert.strictEqual(mockTranslateString('Restart to Update ->'), '重启以应用更新 ->');
+  assert.strictEqual(mockTranslateString('Restart to Update →'), '重启以应用更新 →');
+  assert.strictEqual(mockTranslateString('Restart to Update'), '重启以应用更新');
+  assert.strictEqual(mockTranslateString('Review'), '审核');
 });
 

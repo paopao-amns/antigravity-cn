@@ -18,5 +18,5 @@ if not exist "%~dp0node_modules\@electron\asar" (
     call npm install --no-audit --no-fund
 )
 
-node "%~dp0bin\cli.js" install %*
+node "%~dp0bin\cli.js" install --kill %*
 pause
